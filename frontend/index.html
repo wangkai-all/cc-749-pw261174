@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>合作收益分析 · 本地应用</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <h1>合作收益分析</h1>
+    <span class="brand-sub">Shapley · 核心稳定性 · 保障分配（仅虚构数据，本地运行）</span>
+  </div>
+  <div class="topbar-actions">
+    <label class="theme-switch">
+      <input type="checkbox" id="themeToggle"> 深色模式
+    </label>
+  </div>
+</header>
+
+<main class="layout">
+  <!-- ============================ 左栏：数据录入 ============================ -->
+  <section class="panel panel-input" aria-label="数据录入">
+    <div class="panel-head">
+      <h2>① 游戏数据</h2>
+      <div class="row-gap">
+        <select id="exampleSelect" aria-label="载入示例"></select>
+        <button id="loadExampleBtn" class="btn">载入示例</button>
+      </div>
+    </div>
+
+    <label class="field">
+      <span>游戏名称</span>
+      <input type="text" id="gameName" placeholder="例如：联名作品 A">
+    </label>
+
+    <div class="field">
+      <span>参与方（逗号分隔，最多 14 人；≤12 人可精确求解）</span>
+      <div class="row-gap">
+        <input type="text" id="playersInput" placeholder="P1, P2, P3">
+        <button id="applyPlayersBtn" class="btn btn-ghost">应用参与方</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="row-between">
+        <span>联盟价值与共享成本</span>
+        <button id="addCoalitionBtn" class="btn btn-small">＋ 新增联盟</button>
+      </div>
+      <p class="hint">缺失价值请填上下界，<strong>不会默认成零</strong>；留空两侧表示完全未知。</p>
+      <div class="table-wrap">
+        <table id="coalitionTable">
+          <thead>
+            <tr>
+              <th>联盟成员</th><th>精确价值</th><th>下界</th><th>上界</th>
+              <th>共享成本</th><th>锁定</th><th></th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="row-gap">
+      <button id="analyzeBtn" class="btn btn-primary">计算分析</button>
+      <button id="commitVersionBtn" class="btn">提交为新版本</button>
+      <button id="resetBtn" class="btn btn-ghost">清空</button>
+    </div>
+    <div id="inputMessages" class="messages" role="status"></div>
+  </section>
+
+  <!-- ============================ 中栏：分析结果 ============================ -->
+  <section class="panel panel-results" aria-label="分析结果">
+    <div class="panel-head"><h2>② 贡献分配与稳定性</h2></div>
+
+    <div class="stat-row" id="modeTiles"></div>
+
+    <article class="card">
+      <h3>Shapley 贡献</h3>
+      <div id="shapleyChart" class="chart" aria-label="Shapley 值条形图"></div>
+      <div id="shapleyNotes" class="hint"></div>
+    </article>
+
+    <article class="card">
+      <h3>核心稳定性</h3>
+      <div id="stabilityVerdict" class="verdict"></div>
+      <div id="leastCoreMeta" class="hint"></div>
+      <h4 class="sub">最不稳定联盟（按退出动机差额排序）</h4>
+      <div class="table-wrap">
+        <table id="unstableTable">
+          <thead><tr><th>联盟</th><th>联盟净值</th><th>当前分得</th><th>差额</th><th>状态</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </article>
+
+    <article class="card">
+      <h3>③ 保障与总额约束下的最近可行方案</h3>
+      <div class="grid-2">
+        <label class="field"><span>总额预算（留空取大联盟价值）</span>
+          <input type="number" id="budgetInput" step="any" placeholder="自动"></label>
+      </div>
+      <div class="table-wrap">
+        <table id="guaranteeTable">
+          <thead><tr><th>参与方</th><th>最低保障（留空=无）</th><th>锁定</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <button id="planBtn" class="btn btn-primary">求最近可行方案</button>
+      <div id="planResult"></div>
+    </article>
+  </section>
+
+  <!-- ============================ 右栏：版本与抽样 ============================ -->
+  <aside class="panel panel-side" aria-label="版本与抽样任务">
+    <div class="panel-head"><h2>④ 版本与抽样</h2></div>
+
+    <article class="card">
+      <h3>收益版本（旧版本只读保留）</h3>
+      <div id="versionList" class="version-list"></div>
+    </article>
+
+    <article class="card">
+      <h3>排列抽样任务</h3>
+      <p class="hint">大规模游戏使用确定性随机流；恢复任务从断点继续，排列不重复累计。</p>
+      <div class="row-gap">
+        <label class="field small"><span>种子（可复现）</span>
+          <input type="number" id="seedInput" value="20261124"></label>
+        <label class="field small"><span>批大小</span>
+          <input type="number" id="batchInput" value="200"></label>
+      </div>
+      <div class="row-gap">
+        <button id="createTaskBtn" class="btn">新建抽样任务</button>
+      </div>
+      <div class="row-gap">
+        <label class="field small"><span>本次追加排列数</span>
+          <input type="number" id="permInput" value="1000"></label>
+        <button id="advanceBtn" class="btn btn-primary">追加并恢复</button>
+      </div>
+      <div id="taskList" class="task-list"></div>
+    </article>
+
+    <article class="card">
+      <h3>独立核对</h3>
+      <div id="auditBox" class="audit"></div>
+    </article>
+  </aside>
+</main>
+
+<footer class="footer">
+  所有数据均为虚构示例，不涉及真实结算。计算在本地浏览器与本机 Python 进程内完成。
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
